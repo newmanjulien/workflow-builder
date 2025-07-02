@@ -12,6 +12,7 @@ const WorkflowBuilder = () => {
       executor: 'ai'
     }
   ]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const addStep = () => {
     const newStep = {
@@ -31,6 +32,48 @@ const WorkflowBuilder = () => {
   const deleteStep = (id) => {
     if (steps.length > 1) {
       setSteps(steps.filter(step => step.id !== id));
+    }
+  };
+
+  const saveWorkflow = async () => {
+    // Basic validation
+    if (!workflowTitle.trim()) {
+      alert('Please enter a workflow title');
+      return;
+    }
+
+    const hasEmptySteps = steps.some(step => !step.instruction.trim());
+    if (hasEmptySteps) {
+      alert('Please fill in all step instructions');
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: workflowTitle,
+          steps: steps
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Workflow saved successfully!');
+      } else {
+        alert('Error saving workflow: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Error saving workflow: ' + error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -87,6 +130,18 @@ const WorkflowBuilder = () => {
                     <span>Human</span>
                   </button>
                 </div>
+
+                {/* Delete Step Button (only show if more than 1 step) */}
+                {steps.length > 1 && (
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={() => deleteStep(step.id)}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                    >
+                      Delete Step
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Connector Line */}
@@ -111,8 +166,16 @@ const WorkflowBuilder = () => {
 
         {/* Action Button */}
         <div className="mt-12 flex justify-center">
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-            Save Workflow
+          <button 
+            onClick={saveWorkflow}
+            disabled={isSaving}
+            className={`px-6 py-2 rounded-md transition-colors font-medium ${
+              isSaving 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {isSaving ? 'Saving...' : 'Save Workflow'}
           </button>
         </div>
       </div>
