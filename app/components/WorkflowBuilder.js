@@ -1,18 +1,57 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Sparkles, User } from 'lucide-react';
 
 const WorkflowBuilder = () => {
-  const [workflowTitle, setWorkflowTitle] = useState('After discovery calls');
-  const [steps, setSteps] = useState([
-    {
-      id: 1,
-      instruction: 'At 8pm, pull all the Gong recordings from the rep\'s discovery calls that day. Filter to only deals which have a next step set in Salesforce',
-      executor: 'ai'
-    }
-  ]);
+  const [workflowId, setWorkflowId] = useState(null);
+  const [workflowTitle, setWorkflowTitle] = useState('');
+  const [steps, setSteps] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load existing workflow data on component mount
+  useEffect(() => {
+    loadWorkflows();
+  }, []);
+
+  const loadWorkflows = async () => {
+    try {
+      const response = await fetch('/api/workflows');
+      const result = await response.json();
+      
+      if (result.workflows && result.workflows.length > 0) {
+        // Load the most recent workflow (first in the array since they're ordered by createdAt desc)
+        const latestWorkflow = result.workflows[0];
+        setWorkflowId(latestWorkflow.id);
+        setWorkflowTitle(latestWorkflow.title);
+        setSteps(latestWorkflow.steps);
+      } else {
+        // No existing workflows, set up default data
+        setWorkflowTitle('After discovery calls');
+        setSteps([
+          {
+            id: Date.now(),
+            instruction: 'At 8pm, pull all the Gong recordings from the rep\'s discovery calls that day. Filter to only deals which have a next step set in Salesforce',
+            executor: 'ai'
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading workflows:', error);
+      // Fallback to default data
+      setWorkflowTitle('After discovery calls');
+      setSteps([
+        {
+          id: Date.now(),
+          instruction: 'At 8pm, pull all the Gong recordings from the rep\'s discovery calls that day. Filter to only deals which have a next step set in Salesforce',
+          executor: 'ai'
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const addStep = () => {
     const newStep = {
@@ -51,20 +90,40 @@ const WorkflowBuilder = () => {
     setIsSaving(true);
     
     try {
-      const response = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: workflowTitle,
-          steps: steps
-        })
-      });
+      const workflowData = {
+        title: workflowTitle,
+        steps: steps
+      };
+
+      let response;
+      
+      if (workflowId) {
+        // Update existing workflow
+        response = await fetch(`/api/workflows/${workflowId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(workflowData)
+        });
+      } else {
+        // Create new workflow
+        response = await fetch('/api/workflows', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(workflowData)
+        });
+      }
       
       const result = await response.json();
       
       if (result.success) {
+        // If this was a new workflow, store the ID for future updates
+        if (!workflowId && result.id) {
+          setWorkflowId(result.id);
+        }
         alert('Workflow saved successfully!');
       } else {
         alert('Error saving workflow: ' + result.error);
@@ -77,17 +136,45 @@ const WorkflowBuilder = () => {
     }
   };
 
+  const createNewWorkflow = () => {
+    setWorkflowId(null);
+    setWorkflowTitle('New Workflow');
+    setSteps([
+      {
+        id: Date.now(),
+        instruction: '',
+        executor: 'ai'
+      }
+    ]);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading workflow...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-        {/* Workflow Title */}
-        <div className="mb-8">
-          <input
-            type="text"
-            value={workflowTitle}
-            onChange={(e) => setWorkflowTitle(e.target.value)}
-            className="text-3xl font-bold text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:px-2 focus:py-1 focus:rounded transition-all cursor-text hover:bg-gray-100"
-          />
+        {/* Header with New Workflow Button */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={workflowTitle}
+              onChange={(e) => setWorkflowTitle(e.target.value)}
+              className="text-3xl font-bold text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:px-2 focus:py-1 focus:rounded transition-all cursor-text hover:bg-gray-100 w-full"
+            />
+          </div>
+          <button
+            onClick={createNewWorkflow}
+            className="ml-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
+          >
+            New Workflow
+          </button>
         </div>
 
         {/* Workflow Steps */}
@@ -175,9 +262,16 @@ const WorkflowBuilder = () => {
                 : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
-            {isSaving ? 'Saving...' : 'Save Workflow'}
+            {isSaving ? 'Saving...' : workflowId ? 'Update Workflow' : 'Save Workflow'}
           </button>
         </div>
+
+        {/* Status indicator */}
+        {workflowId && (
+          <div className="mt-4 text-center text-sm text-gray-500">
+            Editing existing workflow (ID: {workflowId.slice(0, 8)}...)
+          </div>
+        )}
       </div>
     </div>
   );
