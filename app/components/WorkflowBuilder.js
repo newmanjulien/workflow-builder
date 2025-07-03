@@ -183,6 +183,7 @@ const WorkflowBuilder = () => {
                   onChange={(e) => updateStep(step.id, 'instruction', e.target.value)}
                   placeholder="Enter instructions in natural language..."
                   className="w-full min-h-24 text-gray-700 bg-transparent border-none outline-none resize-none placeholder-gray-400"
+                />
 
                 {/* Executor Selector */}
                 <div className="mt-4 flex items-center space-x-2">
@@ -214,10 +215,10 @@ const WorkflowBuilder = () => {
                 {/* Human Assignment Selector (only show when executor is human) */}
                 {step.executor === 'human' && (
                   <div className="mt-3">
-                   <select  
-                    value={step.assignedHuman || 'Femi Ibrahim'}
-                    onChange={(e) => updateStep(step.id, 'assignedHuman', e.target.value)}
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors"
+                    <select
+                      value={step.assignedHuman || 'Femi Ibrahim'}
+                      onChange={(e) => updateStep(step.id, 'assignedHuman', e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                     >
                       <option value="Femi Ibrahim">Femi Ibrahim</option>
                       <option value="Jason Mao">Jason Mao</option>
