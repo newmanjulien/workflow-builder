@@ -215,10 +215,10 @@ const WorkflowBuilder = () => {
                 {/* Human Assignment Selector (only show when executor is human) */}
                 {step.executor === 'human' && (
                   <div className="mt-3">
-                    <select
-                      value={step.assignedHuman || 'Femi Ibrahim'}
-                      onChange={(e) => updateStep(step.id, 'assignedHuman', e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                   <select  
+                    value={step.assignedHuman || 'Femi Ibrahim'}
+                    onChange={(e) => updateStep(step.id, 'assignedHuman', e.target.value)}
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors"
                     >
                       <option value="Femi Ibrahim">Femi Ibrahim</option>
                       <option value="Jason Mao">Jason Mao</option>
