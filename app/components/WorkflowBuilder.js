@@ -182,7 +182,7 @@ const WorkflowBuilder = () => {
                   value={step.instruction}
                   onChange={(e) => updateStep(step.id, 'instruction', e.target.value)}
                   placeholder="Enter instructions in natural language..."
-                  className="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors"                />
+                  className="w-full min-h-24 text-gray-700 bg-transparent border-none outline-none resize-none placeholder-gray-400"
 
                 {/* Executor Selector */}
                 <div className="mt-4 flex items-center space-x-2">
