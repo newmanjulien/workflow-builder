@@ -224,7 +224,7 @@ const WorkflowBuilder = () => {
                       <option value="Jason Mao">Jason Mao</option>
                     </select>
                     <div className="mt-1 text-xs text-gray-500 italic">
-                      {step.assignedHuman || 'Femi Ibrahim'} is handling this
+                      {step.assignedHuman || 'Femi Ibrahim'} will handle this
                     </div>
                   </div>
                 )}
