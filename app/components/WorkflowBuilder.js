@@ -136,17 +136,7 @@ const WorkflowBuilder = () => {
     }
   };
 
-  const createNewWorkflow = () => {
-    setWorkflowId(null);
-    setWorkflowTitle('New Workflow');
-    setSteps([
-      {
-        id: Date.now(),
-        instruction: '',
-        executor: 'ai'
-      }
-    ]);
-  };
+
 
   if (isLoading) {
     return (
@@ -159,22 +149,14 @@ const WorkflowBuilder = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-        {/* Header with New Workflow Button */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={workflowTitle}
-              onChange={(e) => setWorkflowTitle(e.target.value)}
-              className="text-3xl font-bold text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:px-2 focus:py-1 focus:rounded transition-all cursor-text hover:bg-gray-100 w-full"
-            />
-          </div>
-          <button
-            onClick={createNewWorkflow}
-            className="ml-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
-          >
-            New Workflow
-          </button>
+        {/* Workflow Title */}
+        <div className="mb-8">
+          <input
+            type="text"
+            value={workflowTitle}
+            onChange={(e) => setWorkflowTitle(e.target.value)}
+            className="text-3xl font-bold text-gray-900 bg-transparent border-none outline-none focus:bg-white focus:px-2 focus:py-1 focus:rounded transition-all cursor-text hover:bg-gray-100"
+          />
         </div>
 
         {/* Workflow Steps */}
