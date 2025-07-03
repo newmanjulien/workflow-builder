@@ -63,9 +63,21 @@ const WorkflowBuilder = () => {
   };
 
   const updateStep = (id, field, value) => {
-    setSteps(steps.map(step => 
-      step.id === id ? { ...step, [field]: value } : step
-    ));
+    setSteps(steps.map(step => {
+      if (step.id === id) {
+        const updatedStep = { ...step, [field]: value };
+        // If switching from human to AI, remove the assignedHuman field
+        if (field === 'executor' && value === 'ai') {
+          delete updatedStep.assignedHuman;
+        }
+        // If switching to human and no human is assigned, default to first option
+        if (field === 'executor' && value === 'human' && !step.assignedHuman) {
+          updatedStep.assignedHuman = 'Femi Ibrahim';
+        }
+        return updatedStep;
+      }
+      return step;
+    }));
   };
 
   const deleteStep = (id) => {
@@ -199,6 +211,23 @@ const WorkflowBuilder = () => {
                     <span>Human</span>
                   </button>
                 </div>
+
+                {/* Human Assignment Selector (only show when executor is human) */}
+                {step.executor === 'human' && (
+                  <div className="mt-3">
+                    <select
+                      value={step.assignedHuman || 'Femi Ibrahim'}
+                      onChange={(e) => updateStep(step.id, 'assignedHuman', e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="Femi Ibrahim">Femi Ibrahim</option>
+                      <option value="Jason Mao">Jason Mao</option>
+                    </select>
+                    <div className="mt-1 text-xs text-gray-500 italic">
+                      {step.assignedHuman || 'Femi Ibrahim'} is handling this
+                    </div>
+                  </div>
+                )}
 
                 {/* Delete Step Button (only show if more than 1 step) */}
                 {steps.length > 1 && (
